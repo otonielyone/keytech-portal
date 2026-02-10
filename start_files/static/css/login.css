@@ -1,0 +1,559 @@
+/* Key-tech Services Color Variables */
+:root {
+    --keytech-blue: #0B5FA5;
+    --keytech-black: #000000;
+    --keytech-dark-gray: #2B2B2B;
+    --keytech-white: #FFFFFF;
+    --keytech-light-blue: #1a7bc4;
+    --keytech-hover-blue: #094a83;
+    --keytech-bg-light: #f5f7fa;
+    --keytech-border: #e1e8ed;
+    --keytech-text-secondary: #5a6c7d;
+    --keytech-error: #dc3545;
+    --keytech-success: #28a745;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body.login-page {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: linear-gradient(135deg, #0B5FA5 0%, #094a83 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Animated Background Pattern */
+body.login-page::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Login Header */
+.login-header {
+    background: rgba(255, 255, 255, 0.98);
+    padding: 1.5rem 2rem;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    z-index: 10;
+}
+
+.login-header-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo-image {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+}
+
+.logo-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.logo-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--keytech-blue);
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+}
+
+.tagline {
+    font-size: 0.75rem;
+    color: var(--keytech-text-secondary);
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+/* Login Wrapper */
+.login-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* Login Container */
+.login-container {
+    width: 100%;
+    max-width: 480px;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Login Card */
+.login-card {
+    background: var(--keytech-white);
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    padding: 3rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--keytech-blue) 0%, var(--keytech-light-blue) 100%);
+}
+
+/* Login Header Section */
+.login-header-section {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.login-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, var(--keytech-blue) 0%, var(--keytech-light-blue) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 4px 12px rgba(11, 95, 165, 0.3);
+}
+
+.login-icon i {
+    font-size: 2rem;
+    color: var(--keytech-white);
+}
+
+.login-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--keytech-dark-gray);
+    margin-bottom: 0.5rem;
+}
+
+.login-subtitle {
+    font-size: 0.95rem;
+    color: var(--keytech-text-secondary);
+    line-height: 1.5;
+}
+
+/* Form Styles */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--keytech-dark-gray);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-label i {
+    color: var(--keytech-blue);
+    font-size: 0.875rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    font-size: 0.95rem;
+    border: 2px solid var(--keytech-border);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    background: var(--keytech-white);
+    color: var(--keytech-dark-gray);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--keytech-blue);
+    box-shadow: 0 0 0 3px rgba(11, 95, 165, 0.1);
+}
+
+.form-input::placeholder {
+    color: #a0aec0;
+}
+
+/* Password Wrapper */
+.password-wrapper {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    color: var(--keytech-text-secondary);
+    transition: color 0.3s ease;
+}
+
+.password-toggle:hover {
+    color: var(--keytech-blue);
+}
+
+.password-toggle i {
+    font-size: 1rem;
+}
+
+/* Form Options */
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: -0.5rem;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--keytech-text-secondary);
+    cursor: pointer;
+    user-select: none;
+}
+
+.remember-me input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--keytech-blue);
+}
+
+.forgot-password {
+    font-size: 0.875rem;
+    color: var(--keytech-blue);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.forgot-password:hover {
+    color: var(--keytech-hover-blue);
+    text-decoration: underline;
+}
+
+/* Login Button */
+.login-button {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--keytech-blue) 0%, var(--keytech-light-blue) 100%);
+    color: var(--keytech-white);
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(11, 95, 165, 0.2);
+    position: relative;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.login-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.login-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(11, 95, 165, 0.3);
+}
+
+.login-button:hover::before {
+    left: 100%;
+}
+
+.login-button:active {
+    transform: translateY(0);
+}
+
+.login-button:disabled {
+    background: #cbd5e0;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.login-button.loading {
+    pointer-events: none;
+}
+
+.login-button.success {
+    background: var(--keytech-success);
+}
+
+.button-loader i {
+    font-size: 1.1rem;
+}
+
+/* Error Message */
+.error-message {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: #fee;
+    border: 1px solid #fcc;
+    border-radius: 8px;
+    color: var(--keytech-error);
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+.error-message i {
+    font-size: 1.1rem;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+}
+
+.error-message.shake {
+    animation: shake 0.4s ease;
+}
+
+/* Login Footer */
+.login-footer {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--keytech-border);
+}
+
+.help-text {
+    font-size: 0.7rem;
+    color: #999;
+    text-align: center;
+    line-height: 1.6;
+}
+
+.help-text a {
+    color: #888;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.help-text a:hover {
+    color: var(--keytech-blue);
+    text-decoration: underline;
+}
+
+/* Security Badges - Small and subtle */
+.security-badges {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    font-size: 0.65rem;
+    color: #bbb;
+    opacity: 0.4;
+}
+
+.security-badges span {
+    padding: 0.25rem 0.5rem;
+    border-right: 1px solid #ddd;
+}
+
+.security-badges span:last-child {
+    border-right: none;
+}
+
+/* Footer */
+.login-footer-bottom {
+    background: rgba(255, 255, 255, 0.98);
+    padding: 1.5rem 2rem;
+    text-align: center;
+    margin-top: auto;
+    position: relative;
+    z-index: 10;
+}
+
+.login-footer-bottom p {
+    font-size: 0.875rem;
+    color: var(--keytech-text-secondary);
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .login-header {
+        padding: 1rem 1.5rem;
+    }
+
+    .logo-image {
+        height: 40px;
+    }
+
+    .logo-text {
+        font-size: 1.1rem;
+    }
+
+    .tagline {
+        font-size: 0.7rem;
+    }
+
+    .login-wrapper {
+        padding: 1.5rem 1rem;
+    }
+
+    .login-card {
+        padding: 2rem 1.5rem;
+    }
+
+    .login-icon {
+        width: 60px;
+        height: 60px;
+    }
+
+    .login-icon i {
+        font-size: 1.75rem;
+    }
+
+    .login-title {
+        font-size: 1.5rem;
+    }
+
+    .login-subtitle {
+        font-size: 0.875rem;
+    }
+
+    .form-options {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .security-badges {
+        gap: 0.4rem;
+        font-size: 0.6rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-card {
+        padding: 1.75rem 1.25rem;
+    }
+
+    .login-header-section {
+        margin-bottom: 2rem;
+    }
+
+    .login-icon {
+        width: 55px;
+        height: 55px;
+    }
+
+    .login-icon i {
+        font-size: 1.5rem;
+    }
+
+    .login-title {
+        font-size: 1.35rem;
+    }
+
+    .security-badges {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .badge {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Print Styles */
+@media print {
+    body.login-page {
+        background: white;
+    }
+
+    .login-header,
+    .login-footer-bottom,
+    .security-badges {
+        display: none;
+    }
+}
+
+/* Accessibility */
+.form-input:focus-visible,
+.login-button:focus-visible,
+.password-toggle:focus-visible {
+    outline: 2px solid var(--keytech-blue);
+    outline-offset: 2px;
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+    /* Can be expanded if dark mode is needed */
+}

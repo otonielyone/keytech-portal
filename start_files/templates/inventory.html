@@ -1,0 +1,408 @@
+{% extends "template.html" %}
+
+{% block title %}Inventory Tracker - Key-tech Services{% endblock %}
+
+{% block body_class %}inventory-page{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="/static/css/inventory.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1>Inventory Tracker</h1>
+
+    <div class="chart-container">
+        <div class="chart-header">Inventory Overview</div>
+        <div class="chart-wrapper">
+            <canvas id="inventoryChart"></canvas>
+        </div>
+    </div>
+
+    <div class="live-section">
+        <p class="live-subtitle">
+            Real-time adjustments for live-tracked items
+            <button class="history-toggle" onclick="toggleHistory()">History</button>
+        </p>
+        
+        <div class="history-panel" id="historyPanel">
+            <div class="history-header">Change History</div>
+            <div class="history-list" id="historyList">
+                <div class="history-empty">No changes recorded yet</div>
+            </div>
+        </div>
+        
+        <div id="liveContainer"></div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    const API_URL = '/api';
+    
+    let items = [
+        {name:'Mount Boxes', used:959, expected:960},
+        {name:'SPR-Install Bags', used:813, expected:818},
+        {name:'G09-LTMB1VZW', used:800, expected:800},
+        {name:'Snap-in Holders', used:709, expected:709},
+        {name:'GPS Units', used:0, id:null},
+        {name:'Card Readers', used:0, id:null}
+    ];
+
+    let history = [];
+
+    // Load from database
+    async function loadData() {
+        try {
+            const response = await fetch(`${API_URL}/inventory`);
+            const dbItems = await response.json();
+            
+            // Update last 2 items with DB data
+            dbItems.forEach((dbItem, i) => {
+                const item = items[items.length - 2 + i];
+                item.used = dbItem.used;
+                item.id = dbItem.id;
+            });
+        } catch (error) {
+            console.error('Failed to load inventory:', error);
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/history`);
+            history = await response.json();
+        } catch (error) {
+            console.error('Failed to load history:', error);
+        }
+
+        renderLiveInputs();
+        updateChart();
+        renderHistory();
+    }
+
+    function toggleHistory() {
+        const panel = document.getElementById('historyPanel');
+        panel.classList.toggle('show');
+    }
+
+    async function addToHistory(itemName, change) {
+        const timestamp = new Date().toLocaleString();
+        
+        try {
+            const response = await fetch(`${API_URL}/history`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    item: itemName,
+                    change: change,
+                    timestamp: timestamp
+                })
+            });
+            const data = await response.json();
+            
+            history.unshift({
+                id: data.id,
+                item: itemName,
+                change: change,
+                timestamp: timestamp
+            });
+            
+            renderHistory();
+        } catch (error) {
+            console.error('Failed to save history:', error);
+        }
+    }
+
+    function renderHistory() {
+        const historyList = document.getElementById('historyList');
+        
+        if (history.length === 0) {
+            historyList.innerHTML = '<div class="history-empty">No changes recorded yet</div>';
+            return;
+        }
+        
+        historyList.innerHTML = history.map(entry => {
+            const type = entry.change > 0 ? 'addition' : 'removal';
+            const valueClass = entry.change > 0 ? 'positive' : 'negative';
+            const sign = entry.change > 0 ? '+' : '';
+            
+            return `
+                <div class="history-item ${type}">
+                    <div class="history-item-content">
+                        <span>${entry.item}</span>
+                        <span class="history-value ${valueClass}">${sign}${entry.change}</span>
+                    </div>
+                    <button class="history-delete" onclick="deleteHistoryItem(${entry.id})" title="Remove">×</button>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function deleteHistoryItem(historyId) {
+        try {
+            await fetch(`${API_URL}/history/${historyId}`, {
+                method: 'DELETE'
+            });
+            
+            history = history.filter(h => h.id !== historyId);
+            renderHistory();
+        } catch (error) {
+            console.error('Failed to delete history item:', error);
+        }
+    }
+
+    const ctx = document.getElementById('inventoryChart').getContext('2d');
+
+    // Dashed border plugin
+    const dashedBorderPlugin = {
+        id: 'dashedBorder',
+        afterDatasetsDraw(chart) {
+            const ctx = chart.ctx;
+            chart.data.datasets.forEach((dataset, datasetIndex) => {
+                if (datasetIndex === 0) {
+                    const meta = chart.getDatasetMeta(datasetIndex);
+                    meta.data.forEach((bar, index) => {
+                        if (index >= items.length - 2) {
+                            const x = bar.x;
+                            const y = bar.y;
+                            const width = bar.width;
+                            const height = chart.chartArea.bottom - y;
+                            ctx.save();
+                            ctx.strokeStyle = 'rgba(52, 152, 219, 0.7)';
+                            ctx.lineWidth = 2;
+                            ctx.setLineDash([8, 4]);
+                            ctx.strokeRect(x - width / 2, y, width, height);
+                            ctx.restore();
+                        }
+                    });
+                }
+            });
+        }
+    };
+
+    // Bar Labels plugin
+    const barLabelsPlugin = {
+        id: 'barLabels',
+        afterDatasetsDraw(chart) {
+            const ctx = chart.ctx;
+            const isMobile = window.innerWidth <= 768;
+            
+            chart.data.datasets.forEach((dataset, datasetIndex) => {
+                const meta = chart.getDatasetMeta(datasetIndex);
+                meta.data.forEach((bar, index) => {
+                    const value = dataset.data[index];
+                    const isNonLive = index < items.length - 2;
+                    const isLiveTracked = datasetIndex === 2 && index >= items.length - 2;
+                    
+                    if (value !== null && (isNonLive || isLiveTracked)) {
+                        ctx.save();
+                        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+                        ctx.font = isMobile ? '600 7.5px Inter' : '600 9px Inter';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'bottom';
+                        
+                        if (isMobile) {
+                            ctx.translate(bar.x, bar.y - 6);
+                            ctx.rotate(-Math.PI / 4);
+                            ctx.fillText(value, 0, 0);
+                        } else {
+                            ctx.fillText(value, bar.x, bar.y - 5);
+                        }
+                        
+                        ctx.restore();
+                    }
+                });
+            });
+        }
+    };
+
+    const inventoryChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: items.map(i=>i.name),
+            datasets: [
+                {
+                    label: 'Expected',
+                    data: items.map((i, idx) => idx >= items.length - 2 ? 1000 : i.expected || null),
+                    backgroundColor: items.map((i, idx) => idx >= items.length - 2 ? 'rgba(0,0,0,0)' : 'rgba(52,152,219,0.12)'),
+                    borderColor: items.map((i, idx) => idx >= items.length - 2 ? 'rgba(0,0,0,0)' : 'rgba(52,152,219,0.7)'),
+                    borderWidth: 2,
+                    barPercentage: 0.85,
+                    categoryPercentage: 0.75,
+                },
+                {
+                    label: 'Counted',
+                    data: items.map((i, idx) => idx < items.length - 2 ? i.used : null),
+                    backgroundColor: 'rgba(46, 204, 113, 0.85)',
+                    borderColor: 'rgba(46, 204, 113, 1)',
+                    borderWidth: 2,
+                    barPercentage: 0.65,
+                    categoryPercentage: 0.75,
+                },
+                {
+                    label: 'Live Tracked',
+                    data: items.map((i, idx) => idx >= items.length - 2 ? i.used : null),
+                    backgroundColor: 'rgba(230, 126, 34, 0.85)',
+                    borderColor: 'rgba(230, 126, 34, 1)',
+                    borderWidth: 2,
+                    barPercentage: 0.65,
+                    categoryPercentage: 0.75,
+                }
+            ]
+        },
+        plugins: [dashedBorderPlugin, barLabelsPlugin],
+        options:{
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins:{
+                legend:{display:false},
+                tooltip:{
+                    mode:'index',
+                    intersect:false,
+                    backgroundColor:'rgba(44,62,80,0.95)',
+                    titleColor:'#ecf0f1',
+                    titleFont:{size:11, weight:'600'},
+                    bodyColor:'#ecf0f1',
+                    bodyFont:{size:10},
+                    borderColor:'#95a5a6',
+                    borderWidth:1,
+                    padding:10,
+                    displayColors:true,
+                    boxPadding:4,
+                    callbacks:{
+                        label:function(context){
+                            const idx = context.dataIndex;
+                            const ds = context.dataset.label;
+                            if(idx >= items.length - 2){
+                                if(ds==='Live Tracked') return `${ds}: ${context.parsed.y}`;
+                                return null;
+                            }
+                            if(ds==='Expected' || ds==='Counted') return `${ds}: ${context.parsed.y}`;
+                            return null;
+                        }
+                    }
+                }
+            },
+            scales:{
+                x:{
+                    ticks:{
+                        color:'#7f8c8d',
+                        font:{size:10, family:'Inter', weight:'500'},
+                        padding: 8
+                    },
+                    grid:{
+                        color:'rgba(0,0,0,0.04)',
+                        drawBorder: false
+                    }
+                },
+                y:{
+                    beginAtZero:true,
+                    ticks:{
+                        color:'#7f8c8d',
+                        font:{size:10, family:'Inter', weight:'500'},
+                        padding: 8
+                    },
+                    grid:{
+                        color:'rgba(0,0,0,0.04)',
+                        drawBorder: false
+                    }
+                }
+            }
+        }
+    });
+
+    const liveContainer = document.getElementById('liveContainer');
+
+    async function saveLive(item){
+        try {
+            await fetch(`${API_URL}/inventory/${item.id}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({used: item.used})
+            });
+        } catch (error) {
+            console.error('Failed to save inventory:', error);
+        }
+    }
+
+    function renderLiveInputs(){
+        liveContainer.innerHTML = '';
+        items.slice(-2).forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'live-item';
+            div.innerHTML = `
+                <div class="item-info">
+                    <span class="item-name">${item.name}</span>
+                    <div class="item-meta">
+                        <div class="current-badge">
+                            <span class="current-label">Used</span>
+                            <span class="current-value">${item.used}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="quantity-controls">
+                    <span class="quantity-label">Counted:</span>
+                    <input type="number" min="0" value="0" class="item-input" placeholder="0">
+                </div>
+                <div class="action-buttons">
+                    <button class="btn apply-btn">Add</button>
+                    <button class="btn remove-btn">Remove</button>
+                </div>
+            `;
+
+            const currentValue = div.querySelector('.current-value');
+            const input = div.querySelector('.item-input');
+            const applyBtn = div.querySelector('.apply-btn');
+            const removeBtn = div.querySelector('.remove-btn');
+
+            applyBtn.addEventListener('click',async ()=>{
+                const val=parseInt(input.value);
+                if(!isNaN(val) && val>0){
+                    item.used+=val;
+                    currentValue.textContent=item.used;
+                    await addToHistory(item.name, val);
+                    input.value=0;
+                    await saveLive(item);
+                    updateChart();
+                }
+            });
+
+            removeBtn.addEventListener('click',async ()=>{
+                const val=parseInt(input.value);
+                if(!isNaN(val) && val>0){
+                    item.used-=val;
+                    if(item.used<0) item.used=0;
+                    currentValue.textContent=item.used;
+                    await addToHistory(item.name, -val);
+                    input.value=0;
+                    await saveLive(item);
+                    updateChart();
+                }
+            });
+
+            input.addEventListener('keypress',e=>{
+                if(e.key==='Enter') applyBtn.click();
+            });
+
+            liveContainer.appendChild(div);
+        });
+    }
+
+    function updateChart(){
+        inventoryChart.data.datasets[0].data = items.map((i, idx)=> idx>=items.length-2?1000:i.expected||null);
+        inventoryChart.data.datasets[1].data = items.map((i, idx)=> idx<items.length-2?i.used:null);
+        inventoryChart.data.datasets[2].data = items.map((i, idx)=> idx>=items.length-2?i.used:null);
+        inventoryChart.update();
+    }
+
+    loadData();
+
+    window.addEventListener('resize', () => {
+        inventoryChart.update();
+    });
+</script>
+{% endblock %}

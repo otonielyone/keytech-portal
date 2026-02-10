@@ -1,0 +1,12 @@
+dn: uid=toni.yone,ou=people,dc=keytech,dc=yonesolutions,dc=com
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: toni.yone
+sn: yone
+uid: toni.yone
+uidNumber: 10000
+gidNumber: 10000
+homeDirectory: /home/toni.yone
+loginShell: /bin/bash
+userPassword: {SSHA}IHmSdaDHdGnP+tz2yGJW9ZmT51E3XFdd
